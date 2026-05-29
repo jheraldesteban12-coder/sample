@@ -120,29 +120,56 @@
   </div>
 
   <script>
-    function addProduct() {
-      let name = document.getElementById("productName").value;
-      let qty = document.getElementById("productQty").value;
-      let price = document.getElementById("productPrice").value;
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
-      if(name === "" || qty === "" || price === ""){
+    function addProduct() {
+      let name = document.getElementById("productName").value.trim();
+      let qtyVal = document.getElementById("productQty").value;
+      let priceVal = document.getElementById("productPrice").value;
+
+      if (!name || qtyVal === "" || priceVal === "") {
         alert("Please fill all fields");
+        return;
+      }
+
+      let qty = parseInt(qtyVal, 10);
+      let price = parseFloat(priceVal);
+
+      if (Number.isNaN(qty) || Number.isNaN(price) || qty < 0 || price < 0) {
+        alert("Please enter valid numeric values for quantity and price");
         return;
       }
 
       let total = qty * price;
 
       let table = document.getElementById("inventoryTable");
-
       let row = table.insertRow();
 
-      row.insertCell(0).innerHTML = name;
-      row.insertCell(1).innerHTML = qty;
-      row.insertCell(2).innerHTML = "₱" + price;
-      row.insertCell(3).innerHTML = "₱" + total;
+      let cell0 = row.insertCell(0);
+      cell0.textContent = name;
 
-      row.insertCell(4).innerHTML =
-        '<button class="delete-btn" onclick="deleteRow(this)">Delete</button>';
+      let cell1 = row.insertCell(1);
+      cell1.textContent = qty;
+
+      let cell2 = row.insertCell(2);
+      cell2.textContent = '₱' + price.toFixed(2);
+
+      let cell3 = row.insertCell(3);
+      cell3.textContent = '₱' + total.toFixed(2);
+
+      let cell4 = row.insertCell(4);
+      let delBtn = document.createElement('button');
+      delBtn.className = 'delete-btn';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', function () { deleteRow(this); });
+      cell4.appendChild(delBtn);
 
       document.getElementById("productName").value = "";
       document.getElementById("productQty").value = "";
@@ -150,8 +177,8 @@
     }
 
     function deleteRow(button) {
-      let row = button.parentNode.parentNode;
-      row.parentNode.removeChild(row);
+      let row = button.closest('tr');
+      if (row) row.remove();
     }
   </script>
 
